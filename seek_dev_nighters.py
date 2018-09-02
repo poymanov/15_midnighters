@@ -9,26 +9,18 @@ def get_request_url():
     return 'https://devman.org/api/challenges/solution_attempts'
 
 
-def load_data(request):
-    try:
-        return json.loads(request.text)
-    except json.decoder.JSONDecodeError:
-        return None
-
-
 def get_attemps_info():
     url = get_request_url()
-    request_success_status = 200
     attempts_info = []
     page = 1
 
     while True:
         params = {'page': page}
-        request = requests.get(url, params=params)
-        if not request.status_code == request_success_status:
+        response = requests.get(url, params=params)
+        if not response.status_code == requests.codes.ok:
             return None
 
-        json_data = load_data(request)
+        json_data = response.json()
 
         if json_data is None:
             return None
