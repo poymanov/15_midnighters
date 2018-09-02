@@ -17,7 +17,7 @@ def get_attemps_info():
     while True:
         params = {'page': page}
         response = requests.get(url, params=params)
-        if not response.status_code == requests.codes.ok:
+        if not response.ok:
             return None
 
         json_data = response.json()
