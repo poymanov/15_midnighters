@@ -8,51 +8,29 @@ def get_request_url():
     return 'https://devman.org/api/challenges/solution_attempts'
 
 
-def load_attempts(pages_count):
+def load_attempts():
     url = get_request_url()
+    page = 1
 
-    for page in range(1, pages_count):
+    while True:
         params = {'page': page}
         response = requests.get(url, params=params)
 
         if not response.ok:
             return None
 
-        attempts_list = response.json()
+        attempts_page = response.json()
 
-        for attempt in attempts_list['records']:
-            yield {
-                'username': attempt['username'],
-                'timestamp': attempt['timestamp'],
-                'timezone': attempt['timezone']
-            }
+        if attempts_page is None:
+            return None
 
+        for attempt in attempts_page['records']:
+            yield attempt
 
-def get_pages_count():
-    url = get_request_url()
+        if not page < attempts_page['number_of_pages']:
+            break
 
-    response = requests.get(url)
-
-    if not response.ok:
-        return None
-
-    pages_info = response.json()
-
-    return pages_info['number_of_pages']
-
-
-def get_attemps_info():
-    attempts_info = []
-
-    pages_count = get_pages_count()
-
-    if not pages_count:
-        return None
-
-    for attempt in load_attempts(pages_count):
-        attempts_info.append(attempt)
-
-    return attempts_info
+        page += 1
 
 
 def get_midnighters_info(attempts_info):
@@ -81,7 +59,7 @@ def output_midnighters_to_console(midnighters_info):
 
 
 if __name__ == '__main__':
-    attempts_info = get_attemps_info()
+    attempts_info = load_attempts()
 
     if not attempts_info:
         exit('Failed to load attemps info')
